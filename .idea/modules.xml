@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/Task_manager.iml" filepath="$PROJECT_DIR$/.idea/Task_manager.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/university-task-tracker.iml" filepath="$PROJECT_DIR$/.idea/university-task-tracker.iml" />
     </modules>
   </component>
 </project>
