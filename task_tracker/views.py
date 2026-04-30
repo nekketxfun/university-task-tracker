@@ -10,10 +10,10 @@ from rest_framework.parsers import MultiPartParser
 from rest_framework.filters import SearchFilter, OrderingFilter
 
 
-from models import (Department, CustomUser, Role, ProcessTemplate,
+from .models import (Department, CustomUser, Role, ProcessTemplate,
                     TemplateStep, Task, Resource, TaskResource,
                     AuditLog, Report)
-from serializers import (DepartmentSerializer, CustomUserSerializer, RoleSerializer,
+from .serializers import (DepartmentSerializer, CustomUserSerializer, RoleSerializer,
                          ProcessTemplateSerializer, TemplateStepSerializer,
                          TaskSerializer, ResourceSerializer, TaskResourceSerializer,
                          AuditLogSerializer, ReportSerializer)

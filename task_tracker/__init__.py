@@ -1,0 +1,1 @@
+default_app_config = 'task_tracker.apps.TaskTrackerConfig'

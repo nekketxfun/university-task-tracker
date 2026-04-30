@@ -1,4 +1,3 @@
-# task_tracker/urls.py
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from .views import (
@@ -7,8 +6,6 @@ from .views import (
     TaskResourceViewSet, AuditLogViewSet, ReportViewSet
 )
 
-# DefaultRouter автоматически генерирует CRUD-маршруты,
-# добавляет поддержку формата (.json, .api) и корневую навигацию
 router = DefaultRouter()
 
 router.register(r'departments', DepartmentViewSet, basename='department')
