@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="text-2xl font-bold text-gray-900 mb-6">Журнал аудита</h1>
+<div class="bg-white rounded-xl shadow border p-6">
+    <div class="flex flex-wrap gap-4 mb-4">
+        <select name="entity" hx-get="{% url 'audit_list' %}" hx-target="#audit-body" class="border rounded px-3 py-1.5 text-sm">
+            <option value="">Все сущности</option>
+            <option value="task">Задачи</option>
+            <option value="resource">Ресурсы</option>
+        </select>
+        <select name="actor" hx-get="{% url 'audit_list' %}" hx-target="#audit-body" class="border rounded px-3 py-1.5 text-sm">
+            <option value="">Все пользователи</option>
+            {% for u in users %}<option value="{{ u.id }}">{{ u.full_name|default:u.username }}</option>{% endfor %}
+        </select>
+    </div>
+    <div id="audit-body" class="space-y-3 max-h-[600px] overflow-y-auto pr-2">
+        {% for log in page_obj %}
+            <div class="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+                <div class="w-2 h-2 mt-2 rounded-full bg-blue-500"></div>
+                <div class="flex-1">
+                    <div class="flex justify-between text-sm">
+                        <span class="font-medium text-gray-900">{{ log.entity_table }}:{{ log.entity_id|truncatechars:8 }}</span>
+                        <span class="text-gray-500">{{ log.timestamp|date:"d.m.Y H:i" }}</span>
+                    </div>
+                    <p class="text-sm text-gray-600 mt-1">{{ log.get_action_display }} пользователем {{ log.actor.full_name|default:"Система" }}</p>
+                </div>
+            </div>
+        {% empty %}
+            <p class="text-center text-gray-500 py-4">Записей нет</p>
+        {% endfor %}
+    </div>
+    {% if page_obj.paginator.num_pages > 1 %}
+    <div class="mt-4 flex justify-center gap-2">
+        {% if page_obj.has_previous %}<button hx-get="?page={{ page_obj.previous_page_number }}" hx-target="#audit-body" class="px-2 py-1 border rounded text-sm">←</button>{% endif %}
+        <span class="px-2 text-sm">{{ page_obj.number }}/{{ page_obj.paginator.num_pages }}</span>
+        {% if page_obj.has_next %}<button hx-get="?page={{ page_obj.next_page_number }}" hx-target="#audit-body" class="px-2 py-1 border rounded text-sm">→</button>{% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

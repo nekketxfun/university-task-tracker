@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="text-2xl font-bold text-gray-900 mb-6">Шаблоны процессов</h1>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    {% for tpl in templates %}
+    <div class="bg-white p-5 rounded-xl shadow border hover:shadow-md transition">
+        <h3 class="text-lg font-semibold text-gray-900">{{ tpl.name }}</h3>
+        <p class="text-sm text-gray-500 mt-1 line-clamp-2">{{ tpl.description|truncatechars:80 }}</p>
+        <div class="mt-4 flex justify-between items-center">
+            <span class="text-xs px-2 py-1 bg-blue-50 text-blue-700 rounded">{{ tpl.steps.count }} этапов</span>
+            <button hx-post="/api/v1/templates/{{ tpl.id }}/instantiate/" hx-swap="outerHTML" hx-target="#toast-{{ tpl.id }}"
+                    class="text-sm px-3 py-1.5 bg-green-600 text-white rounded hover:bg-green-700">Запустить</button>
+        </div>
+        <div id="toast-{{ tpl.id }}" class="mt-2 text-xs text-green-600"></div>
+    </div>
+    {% empty %}
+    <p class="col-span-3 text-center text-gray-500 py-8">Шаблоны не найдены</p>
+    {% endfor %}
+</div>
+{% endblock %}

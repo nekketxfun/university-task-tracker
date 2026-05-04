@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+    <h1 class="text-2xl font-bold text-gray-900">Список задач</h1>
+    <div class="flex gap-2">
+        <button x-data="{ open: false }" @click="open=true" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition">+ Создать</button>
+        <a href="/api/v1/tasks/export_csv/" class="bg-white border px-4 py-2 rounded-lg text-sm text-gray-700 hover:bg-gray-50">📥 Экспорт CSV</a>
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="bg-white p-4 rounded-xl shadow border mb-6 flex flex-wrap gap-4 items-center">
+    <select name="status" hx-get="{% url 'task_list' %}" hx-target="#task-table" hx-trigger="change" class="border rounded px-3 py-1.5 text-sm">
+        <option value="">Все статусы</option>
+        {% for val, label in task_statuses %}<option value="{{ val }}">{{ label }}</option>{% endfor %}
+    </select>
+    <select name="priority" hx-get="{% url 'task_list' %}" hx-target="#task-table" hx-trigger="change" class="border rounded px-3 py-1.5 text-sm">
+        <option value="">Все приоритеты</option>
+        {% for val, label in task_priorities %}<option value="{{ val }}">{{ label }}</option>{% endfor %}
+    </select>
+    <input type="text" name="q" placeholder="Поиск..." hx-get="{% url 'task_list' %}" hx-target="#task-table" hx-trigger="keyup changed delay:300ms" class="border rounded px-3 py-1.5 text-sm flex-1">
+</div>
+
+<!-- Table -->
+<div id="task-table" class="bg-white rounded-xl shadow border overflow-x-auto">
+    <table class="w-full text-sm text-left">
+        <thead class="bg-gray-50 text-gray-600 uppercase">
+            <tr>
+                <th class="p-4">Название</th><th class="p-4">Статус</th><th class="p-4">Приоритет</th><th class="p-4">Дедлайн</th><th class="p-4">Исполнитель</th><th class="p-4"></th>
+            </tr>
+        </thead>
+        <tbody class="divide-y">
+            {% for task in page_obj %}
+            <tr class="hover:bg-gray-50">
+                <td class="p-4 font-medium text-blue-600 hover:underline cursor-pointer" onclick="location.href='{% url 'task_detail' task.id %}'">{{ task.title }}</td>
+                <td class="p-4">
+                    <span class="px-2 py-0.5 rounded text-xs font-medium {% if task.status == 'done' %}bg-green-100 text-green-800{% elif task.status == 'in_progress' %}bg-blue-100 text-blue-800{% else %}bg-yellow-100 text-yellow-800{% endif %}">{{ task.get_status_display }}</span>
+                </td>
+                <td class="p-4">{{ task.get_priority_display }}</td>
+                <td class="p-4 text-gray-500">{{ task.deadline|date:"d.m.Y H:i" }}</td>
+                <td class="p-4 text-gray-600">{{ task.assignee.full_name|default:"—" }}</td>
+                <td class="p-4"><a href="{% url 'task_detail' task.id %}" class="text-blue-600 hover:underline">Подробнее</a></td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="6" class="p-8 text-center text-gray-500">Задач не найдено</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Pagination -->
+{% if page_obj.paginator.num_pages > 1 %}
+<div class="mt-4 flex justify-center gap-2">
+    {% if page_obj.has_previous %}
+        <button hx-get="?page={{ page_obj.previous_page_number }}" hx-target="#task-table" hx-swap="innerHTML" class="px-3 py-1 border rounded hover:bg-gray-50 text-sm">←</button>
+    {% endif %}
+    <span class="px-3 py-1 text-sm text-gray-600">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+    {% if page_obj.has_next %}
+        <button hx-get="?page={{ page_obj.next_page_number }}" hx-target="#task-table" hx-swap="innerHTML" class="px-3 py-1 border rounded hover:bg-gray-50 text-sm">→</button>
+    {% endif %}
+</div>
+{% endif %}
+
+<!-- Create Modal (Alpine) -->
+<div x-data="{ open: false }" x-show="open" class="fixed inset-0 bg-black/40 flex items-center justify-center z-50" style="display:none;">
+    <div @click.away="open=false" class="bg-white rounded-xl shadow-lg p-6 w-full max-w-md">
+        <h3 class="text-lg font-bold mb-4">Новая задача</h3>
+        <form hx-post="/api/v1/tasks/" hx-target="#modal-msg" hx-swap="outerHTML" class="space-y-3">
+            {% csrf_token %}
+            <input name="title" placeholder="Название" required class="w-full border rounded px-3 py-2 text-sm">
+            <textarea name="description" placeholder="Описание" class="w-full border rounded px-3 py-2 text-sm h-20"></textarea>
+            <select name="priority" class="w-full border rounded px-3 py-2 text-sm">
+                <option value="low">Низкий</option><option value="medium" selected>Средний</option><option value="high">Высокий</option><option value="urgent">Срочный</option>
+            </select>
+            <input type="datetime-local" name="deadline" required class="w-full border rounded px-3 py-2 text-sm">
+            <div id="modal-msg"></div>
+            <div class="flex justify-end gap-2 mt-4">
+                <button type="button" @click="open=false" class="px-4 py-2 border rounded text-sm">Отмена</button>
+                <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded text-sm hover:bg-blue-700">Создать</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

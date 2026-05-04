@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="text-center py-20">
+    <h1 class="text-6xl font-bold text-red-500">403</h1>
+    <p class="text-xl text-gray-700 mt-4">Доступ запрещён. Проверьте права доступа или авторизуйтесь.</p>
+    <a href="{% url 'dashboard' %}" class="mt-6 inline-block px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">На главную</a>
+</div>
+{% endblock %}

@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="text-2xl font-bold text-gray-900 mb-6">Панель управления</h1>
+
+<!-- KPI Cards -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+    <div class="bg-white p-4 rounded-xl shadow border">
+        <p class="text-sm text-gray-500">Всего задач</p>
+        <p class="text-2xl font-bold text-gray-900">{{ total_tasks|default:"—" }}</p>
+    </div>
+    <div class="bg-white p-4 rounded-xl shadow border">
+        <p class="text-sm text-gray-500">В срок</p>
+        <p class="text-2xl font-bold text-green-600">{{ on_time_tasks|default:"—" }}</p>
+    </div>
+    <div class="bg-white p-4 rounded-xl shadow border">
+        <p class="text-sm text-gray-500">Просрочено</p>
+        <p class="text-2xl font-bold text-red-600">{{ overdue_tasks|default:"—" }}</p>
+    </div>
+    <div class="bg-white p-4 rounded-xl shadow border">
+        <p class="text-sm text-gray-500">Активных процессов</p>
+        <p class="text-2xl font-bold text-blue-600">{{ active_processes|default:"—" }}</p>
+    </div>
+</div>
+
+<!-- Chart & Recent -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div class="lg:col-span-2 bg-white p-6 rounded-xl shadow border">
+        <h3 class="text-lg font-medium mb-4">Динамика выполнения</h3>
+        <canvas id="tasksChart" height="120"></canvas>
+    </div>
+    <div class="bg-white p-6 rounded-xl shadow border">
+        <h3 class="text-lg font-medium mb-4">Последние задачи</h3>
+        <ul class="space-y-3 text-sm">
+            {% for task in recent_tasks %}
+                <li class="flex justify-between">
+                    <a href="{% url 'task_detail' task.id %}" class="text-blue-600 hover:underline truncate max-w-[150px]">{{ task.title }}</a>
+                    <span class="px-2 py-0.5 rounded text-xs {% if task.status == 'done' %}bg-green-100 text-green-800{% else %}bg-yellow-100 text-yellow-800{% endif %}">{{ task.get_status_display }}</span>
+                </li>
+            {% empty %}
+                <li class="text-gray-500 italic">Нет данных</li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+
+<script>
+    const ctx = document.getElementById('tasksChart');
+    if(ctx) new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: ['Пн', 'Вт', 'Ср', 'Чт', 'Пт'],
+            datasets: [{ label: 'Завершено', data: [5, 8, 6, 9, 7], borderColor: '#2563eb', tension: 0.3, fill: false }]
+        },
+        options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+    });
+</script>
+{% endblock %}

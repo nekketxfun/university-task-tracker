@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="text-2xl font-bold text-gray-900 mb-6">Генерация отчётов</h1>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div class="bg-white p-6 rounded-xl shadow border">
+        <h3 class="text-lg font-medium mb-4">Новый отчёт</h3>
+        <form hx-post="/api/v1/reports/" hx-swap="outerHTML" hx-target="#report-status" class="space-y-3">
+            {% csrf_token %}
+            <select name="report_type" class="w-full border rounded px-3 py-2 text-sm">
+                <option value="performance">Эффективность</option>
+                <option value="deadlines">Дедлайны</option>
+                <option value="load">Нагрузка</option>
+            </select>
+            <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded text-sm hover:bg-blue-700">Сгенерировать</button>
+        </form>
+        <div id="report-status" class="mt-4"></div>
+    </div>
+    <div class="bg-white p-6 rounded-xl shadow border">
+        <h3 class="text-lg font-medium mb-4">Готовые файлы</h3>
+        <ul class="space-y-2 text-sm">
+            {% for r in reports %}
+            <li class="flex justify-between items-center">
+                <span>{{ r.title }} ({{ r.get_status_display }})</span>
+                {% if r.status == 'completed' %}
+                    <a href="{{ r.file_path }}" download class="text-blue-600 hover:underline">Скачать</a>
+                {% else %}
+                    <span class="text-gray-400 text-xs">В обработке...</span>
+                {% endif %}
+            </li>
+            {% empty %}
+                <li class="text-gray-500 italic">Нет отчётов</li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+{% endblock %}

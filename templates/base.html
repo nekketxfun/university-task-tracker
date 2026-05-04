@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ru" class="h-full bg-gray-50">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Трекер задач ВУЗа{% endblock %}</title>
+    <!-- CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+    <script src="https://unpkg.com/htmx.org@1.9.12/dist/ext/client-side-templates.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- HTMX CSRF -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const csrf = document.querySelector('[name=csrfmiddlewaretoken]')?.value;
+            if (csrf) htmx.config.headers = {'X-CSRFToken': csrf};
+        });
+    </script>
+    {% block head %}{% endblock %}
+</head>
+<body class="h-full flex flex-col">
+    <!-- Header -->
+    <header class="bg-white border-b border-gray-200 sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex items-center gap-4">
+                    <span class="text-xl font-bold text-blue-600">🎓 UniTracker</span>
+                    <nav class="hidden md:flex gap-4 text-sm">
+                        <a href="{% url 'dashboard' %}" class="text-gray-700 hover:text-blue-600">Дашборд</a>
+                        <a href="{% url 'task_list' %}" class="text-gray-700 hover:text-blue-600">Задачи</a>
+                        <a href="{% url 'template_list' %}" class="text-gray-700 hover:text-blue-600">Шаблоны</a>
+                        <a href="{% url 'resource_list' %}" class="text-gray-700 hover:text-blue-600">Ресурсы</a>
+                        <a href="{% url 'audit_list' %}" class="text-gray-700 hover:text-blue-600">Аудит</a>
+                        <a href="{% url 'report_list' %}" class="text-gray-700 hover:text-blue-600">Отчёты</a>
+                    </nav>
+                </div>
+                {% if user.is_authenticated %}
+                    <div class="flex items-center gap-3" x-data="{ open: false }">
+                        <button @click="open = !open" class="flex items-center gap-2 text-gray-700 hover:text-blue-600">
+                            <span class="font-medium">{{ user.full_name|default:user.username }}</span>
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        </button>
+                        <div x-show="open" @click.away="open=false" class="absolute right-4 top-14 w-48 bg-white rounded-md shadow-lg border p-1">
+                            <a href="{% url 'logout' %}" class="block px-4 py-2 text-sm text-red-600 hover:bg-gray-100 rounded">Выйти</a>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </header>
+
+    <!-- Messages -->
+    {% if messages %}
+    <div class="fixed top-20 right-4 z-50 space-y-2 max-w-sm">
+        {% for msg in messages %}
+            <div x-data="{ show: true }" x-show="show" x-transition
+                 class="p-3 rounded-lg shadow text-sm {% if msg.tags == 'error' %}bg-red-100 text-red-700{% else %}bg-green-100 text-green-700{% endif %}">
+                {{ msg }}
+                <button @click="show=false" class="float-right ml-2">×</button>
+            </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Main -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t py-4 text-center text-xs text-gray-500">
+        © 2026 Университетский трекер задач. Все данные защищены.
+    </footer>
+
+    <!-- Global HTMX Spinner -->
+    <div id="htmx-spinner" class="fixed inset-0 bg-black/30 flex items-center justify-center hidden z-50">
+        <div class="animate-spin rounded-full h-10 w-10 border-4 border-blue-600 border-t-transparent"></div>
+    </div>
+    <style>.htmx-request #htmx-spinner { display: flex; }</style>
+</body>
+</html>

@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block content %}
+<a href="{% url 'task_list' %}" class="text-blue-600 hover:underline mb-4 inline-block">← Назад к списку</a>
+<div class="bg-white rounded-xl shadow border p-6 mb-6">
+    <div class="flex justify-between items-start mb-4">
+        <h1 class="text-2xl font-bold text-gray-900">{{ task.title }}</h1>
+        <span class="px-3 py-1 rounded-full text-xs font-medium {% if task.status == 'done' %}bg-green-100 text-green-800{% else %}bg-yellow-100 text-yellow-800{% endif %}">{{ task.get_status_display }}</span>
+    </div>
+    <p class="text-gray-600 mb-4 whitespace-pre-wrap">{{ task.description|default:"Описание отсутствует" }}</p>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-gray-500 mb-4">
+        <div><span class="font-medium text-gray-700">Приоритет:</span> {{ task.get_priority_display }}</div>
+        <div><span class="font-medium text-gray-700">Дедлайн:</span> {{ task.deadline|date:"d.m.Y H:i" }}</div>
+        <div><span class="font-medium text-gray-700">Создана:</span> {{ task.created_at|date:"d.m.Y H:i" }}</div>
+        <div><span class="font-medium text-gray-700">Исполнитель:</span> {{ task.assignee.full_name|default:"—" }}</div>
+    </div>
+    <form hx-patch="/api/v1/tasks/{{ task.id }}/" hx-target="#status-msg" class="flex gap-2 items-center">
+        {% csrf_token %}
+        <select name="status" class="border rounded px-2 py-1 text-sm">
+            {% for val, label in task_statuses %}<option value="{{ val }}" {% if task.status == val %}selected{% endif %}>{{ label }}</option>{% endfor %}
+        </select>
+        <button class="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700">Обновить</button>
+        <span id="status-msg"></span>
+    </form>
+</div>
+
+<h2 class="text-lg font-medium mb-3">История изменений</h2>
+<div class="bg-white rounded-xl shadow border p-4 space-y-3">
+    {% for log in audit_logs %}
+        <div class="flex gap-3 text-sm border-b pb-2 last:border-0 last:pb-0">
+            <span class="text-gray-400">{{ log.timestamp|date:"d.m.Y H:i" }}</span>
+            <span class="text-gray-700 font-medium">{{ log.actor.full_name|default:"Система" }}</span>
+            <span class="px-2 py-0.5 bg-gray-100 rounded text-xs">{{ log.get_action_display }}</span>
+        </div>
+    {% empty %}
+        <p class="text-gray-500 text-sm italic">Журнал пуст</p>
+    {% endfor %}
+</div>
+{% endblock %}
